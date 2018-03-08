@@ -20,10 +20,9 @@ int totalMoves = 0;
 int acceptedMoves = 0;
 int numberOfSamples = 0;
 double kb = 1;
-double T = 1.5;
+double T = 1;
 double beta = 1;
 double eCum = 0;
-
 
 double get_random(){
     int ran_input = -1*(int) time(NULL)*100*rand();
@@ -191,7 +190,7 @@ void sampleHisto(double **pCoo, int *histo, double binWidth){
     int i = 0;
     int j = 0;
     double dist = 0;
-    double xL2 = xL * xL;
+    double xL2 = (xL * xL)/4;
 
     for(i = 0; i < numOfParticles; i++){
         j = i + 1;
@@ -204,7 +203,6 @@ void sampleHisto(double **pCoo, int *histo, double binWidth){
             j++;
         }
     }
-
     numberOfSamples++;
 }
 
@@ -222,7 +220,7 @@ void saveRDF(int *histo, int bins, double binWidth){
 
     //Number of particles in ideal gas with same density
     for(i = 0; i < bins; i++){
-        dv = 4/3 * pi * (pow(i + 1, 3) - pow(i, 3)) * pow(binWidth, 3);
+        dv = (double)4/3 * pi * (pow(i + 1, 3) - pow(i, 3)) * pow(binWidth, 3);
         idealDen = dv * numOfParticles/(xL*yL*zL);
         fprintf(f, "%lf     %lf\n", i * binWidth, histo[i]/(numOfParticles * numberOfSamples * idealDen));
     }
@@ -364,7 +362,7 @@ int main(int argc, char *argv[])
     // ///////////////////////////////         Main MC-loop          ////////////////////////////////////////
     printf("\nRunning main MC-loop at temperature: %lf\n", T);
     int prevAccepted = 0;
-    for(i = 0; i < 1000000; i++){
+    for(i = 0; i < 10000000; i++){
 
         // if(i % 1000000 == 0 && i != 0){
         //     if(i < 2000001){
@@ -373,9 +371,11 @@ int main(int argc, char *argv[])
         //         beta = 1/(10*T);
         //     }
         // }
+
         if(i % 10000 == 0 && i > 100000){
             sampleHisto(pCoo, histo, binWidth);
         }
+
         if(mcmove(pCoo)){
            prevAccepted++; 
         }
